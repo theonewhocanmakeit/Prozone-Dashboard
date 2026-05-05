@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ProZone Realty — Project Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-logo">PZ</div>
+        <div class="brand-text">
+          <span class="brand-name">ProZone Realty</span>
+          <span class="brand-tag">Project Command Center</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="live-dot-wrap"><span class="live-dot"></span><span class="live-label">Live</span></div>
+        <button class="btn-add" onclick="openModal()">+ Add Update</button>
+        <button class="btn-history" onclick="openHistory()">📋 Completed History</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-pill"><span class="stat-num" id="count-total">0</span><span class="stat-lbl">Total Projects</span></div>
+    <div class="stat-pill on-track"><span class="stat-num" id="count-ontrack">0</span><span class="stat-lbl">On Track</span></div>
+    <div class="stat-pill delayed"><span class="stat-num" id="count-delayed">0</span><span class="stat-lbl">Delayed</span></div>
+    <div class="stat-pill completed"><span class="stat-num" id="count-completed">0</span><span class="stat-lbl">Completed</span></div>
+  </div>
+
+  <!-- PROJECT SLICER -->
+  <div class="slicer-bar" id="slicer-bar">
+    <span class="slicer-label">Projects:</span>
+    <div class="slicer-pills" id="slicer-pills">
+      <button class="slicer-btn active" data-project="all" onclick="sliceProject('all', this)">All</button>
+    </div>
+  </div>
+
+  <!-- SUB-PROJECT SLICER (shown when a project is selected) -->
+  <div class="sub-slicer-bar" id="sub-slicer-bar" style="display:none;">
+    <span class="slicer-label">Sub-projects:</span>
+    <div class="slicer-pills" id="sub-slicer-pills"></div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterStatus('all', this)">All Status</button>
+    <button class="filter-btn" onclick="filterStatus('On Track', this)">🟢 On Track</button>
+    <button class="filter-btn" onclick="filterStatus('Delayed', this)">🔴 Delayed</button>
+    <div class="search-wrap">
+      <input type="text" id="search-input" placeholder="Search…" oninput="searchCards(this.value)" />
+    </div>
+  </div>
+
+  <!-- PROJECT GRID -->
+  <main class="main-content">
+    <div class="grid" id="projects-grid"></div>
+    <div class="empty-state" id="empty-state" style="display:none;">
+      <div class="empty-icon">📋</div>
+      <p>No projects found.</p>
+      <span>Try a different filter or add a new update.</span>
+    </div>
+  </main>
+
+  <!-- ACTIVITY SIDEBAR -->
+  <aside class="activity-sidebar">
+    <div class="sidebar-header">
+      <h3>Activity Log</h3>
+      <span id="activity-count" class="badge">0</span>
+    </div>
+    <ul class="activity-list" id="activity-list">
+      <li class="activity-empty">No activity yet</li>
+    </ul>
+  </aside>
+
+  <!-- ADD/EDIT UPDATE MODAL -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Post a Project Update</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <form id="update-form" onsubmit="submitUpdate(event)">
+        <input type="hidden" id="f-edit-id" value="" />
+
+        <div class="form-group">
+          <label>Main Project</label>
+          <input type="text" id="f-project" list="project-list" placeholder="Type or select e.g. Bandra" required maxlength="80" autocomplete="off"/>
+          <datalist id="project-list">
+            <option value="Bandra Residences"/>
+            <option value="Worli Skyline"/>
+            <option value="Andheri Heights"/>
+            <option value="Juhu Marina"/>
+            <option value="Powai Greens"/>
+          </datalist>
+        </div>
+
+        <div class="form-group">
+          <label>Sub-Project <span class="optional">(optional)</span></label>
+          <input type="text" id="f-subproject" list="subproject-list" placeholder="e.g. Tower A, Phase 1, Parking Block" maxlength="80" autocomplete="off"/>
+          <datalist id="subproject-list"></datalist>
+        </div>
+
+        <div class="form-group">
+          <label>Status</label>
+          <div class="status-options">
+            <label class="status-radio on-track-radio">
+              <input type="radio" name="status" value="On Track" required /> On Track
+            </label>
+            <label class="status-radio delayed-radio">
+              <input type="radio" name="status" value="Delayed" /> Delayed
+            </label>
+            <label class="status-radio completed-radio">
+              <input type="radio" name="status" value="Completed" /> Completed
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Update / Note</label>
+          <textarea id="f-update" rows="3" placeholder="e.g. Foundation work completed. Moving to structure phase." required maxlength="300"></textarea>
+          <span class="char-count" id="char-count">0 / 300</span>
+        </div>
+
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="f-name" placeholder="e.g. Rahul Sharma" required maxlength="60" />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn-submit" id="submit-btn">Post Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- COMPLETED HISTORY MODAL -->
+  <div class="modal-overlay" id="history-overlay" onclick="closeHistoryOutside(event)">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <h2>✅ Completed Projects History</h2>
+        <button class="modal-close" onclick="closeHistory()">✕</button>
+      </div>
+      <div id="history-list" class="history-modal-list">
+        <p class="no-history">No completed projects yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="firebase.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
