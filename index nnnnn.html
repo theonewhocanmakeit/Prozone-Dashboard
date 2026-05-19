@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ProZone Realty — Command Center</title>
+  <link rel="stylesheet" href="style.css?v=13"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidenav" id="sidenav">
+  <div class="sidenav-logo">
+    <div class="logo-mark">PZ</div>
+    <div class="logo-text">
+      <span class="logo-main">ProZone</span>
+      <span class="logo-sub">Realty</span>
+    </div>
+  </div>
+  <div class="sidenav-section">
+    <span class="sidenav-label">Views</span>
+    <button class="sidenav-item active" id="btn-list" onclick="setView('list',this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      List
+    </button>
+    <button class="sidenav-item" id="btn-board" onclick="setView('board',this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Board
+    </button>
+  </div>
+  <div class="sidenav-section">
+    <span class="sidenav-label">Projects</span>
+    <div id="sidenav-projects"><div class="sidenav-item muted">Loading…</div></div>
+    <button class="sidenav-item add-btn" onclick="openModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Update
+    </button>
+  </div>
+  <div class="sidenav-bottom">
+    <button class="sidenav-item" onclick="openHistory()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Completed History
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSidebar()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="page-title" id="page-title">All Projects</span>
+      <span class="live-pill"><span class="live-dot"></span>Live</span>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search…" id="search-input" oninput="searchCards(this.value)"/>
+      </div>
+      <button class="btn-primary" onclick="openModal()">+ Add Update</button>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filterbar">
+    <div class="filter-group">
+      <button class="filter-chip active" onclick="filterStatus('all',this)">All</button>
+      <button class="filter-chip" onclick="filterStatus('On Track',this)">On Track</button>
+      <button class="filter-chip" onclick="filterStatus('Delayed',this)">Delayed</button>
+      <button class="filter-chip" onclick="filterStatus('Completed',this)">Completed</button>
+    </div>
+    <div class="filter-divider"></div>
+    <div class="filter-group">
+      <button class="dept-chip active" onclick="filterDept('all',this)">All Depts</button>
+      <button class="dept-chip d-mkt" onclick="filterDept('Marketing',this)">📢 Marketing</button>
+      <button class="dept-chip d-fin" onclick="filterDept('Finance',this)">💰 Finance</button>
+      <button class="dept-chip d-hr" onclick="filterDept('HR',this)">👥 HR</button>
+      <button class="dept-chip d-sal" onclick="filterDept('Sales',this)">🤝 Sales</button>
+      <button class="dept-chip d-ops" onclick="filterDept('Operations',this)">⚙️ Operations</button>
+    </div>
+    <div class="filter-right">
+      <select class="sort-select" onchange="applySort(this.value)">
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+        <option value="az">A → Z</option>
+        <option value="za">Z → A</option>
+      </select>
+      <select class="sort-select" onchange="applyDateFilter(this.value)">
+        <option value="all">All Time</option>
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="count-total">0</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-card green"><div class="stat-num" id="count-ontrack">0</div><div class="stat-lbl">On Track</div></div>
+    <div class="stat-card red"><div class="stat-num" id="count-delayed">0</div><div class="stat-lbl">Delayed</div></div>
+    <div class="stat-card blue"><div class="stat-num" id="count-completed">0</div><div class="stat-lbl">Completed</div></div>
+  </div>
+
+  <!-- SUB-PROJECT BAR -->
+  <div class="subbar" id="subproject-bar" style="display:none">
+    <span class="subbar-label">Sub-projects in <strong id="active-project-name"></strong>:</span>
+    <div id="sub-chips"></div>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div id="list-view">
+    <div class="table-wrap">
+      <div class="list-header">
+        <div>Name</div>
+        <div>Sub-Project</div>
+        <div>Latest Update</div>
+        <div>Department</div>
+        <div>Further Update</div>
+        <div>Dependency</div>
+        <div>Updated By</div>
+        <div>Time</div>
+        <div></div>
+      </div>
+      <div id="list-body"></div>
+    </div>
+    <div class="empty-state" id="empty-state" style="display:none">
+      <div class="empty-icon">🏗️</div>
+      <p>No projects yet</p>
+      <span>Click "+ Add Update" to get started</span>
+    </div>
+  </div>
+
+  <!-- BOARD VIEW -->
+  <div id="board-view" style="display:none">
+    <div class="board-wrap">
+      <div class="board-col">
+        <div class="board-col-head green-head"><span class="col-dot green-dot"></span>On Track<span class="col-cnt" id="board-count-ontrack">0</span></div>
+        <div id="board-ontrack" class="board-col-body"></div>
+      </div>
+      <div class="board-col">
+        <div class="board-col-head red-head"><span class="col-dot red-dot"></span>Delayed<span class="col-cnt" id="board-count-delayed">0</span></div>
+        <div id="board-delayed" class="board-col-body"></div>
+      </div>
+      <div class="board-col">
+        <div class="board-col-head blue-head"><span class="col-dot blue-dot"></span>Completed<span class="col-cnt" id="board-count-completed">0</span></div>
+        <div id="board-completed" class="board-col-body"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-wrap -->
+
+<!-- MOBILE BOTTOM NAV -->
+<div class="mobile-nav">
+  <button class="mob-btn active" onclick="setView('list',this);setMobNav(this)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg>
+    <span>List</span>
+  </button>
+  <button class="mob-btn" onclick="setView('board',this);setMobNav(this)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span>Board</span>
+  </button>
+  <button class="mob-btn" onclick="openModal()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    <span>Add</span>
+  </button>
+  <button class="mob-btn" onclick="openHistory()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span>History</span>
+  </button>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modal-title">New Project Update</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <form id="update-form" onsubmit="submitUpdate(event)">
+      <input type="hidden" id="f-edit-id"/>
+      <div class="form-row2">
+        <div class="form-group">
+          <label>Main Project <span class="req">*</span></label>
+          <input type="text" id="f-project" list="project-datalist" placeholder="Type or pick…" required maxlength="80" autocomplete="off"/>
+          <datalist id="project-datalist">
+            <option value="Bandra Residences"/><option value="Worli Skyline"/>
+            <option value="Andheri Heights"/><option value="Juhu Marina"/><option value="Powai Greens"/>
+          </datalist>
+        </div>
+        <div class="form-group">
+          <label>Sub-Project <span class="opt">optional</span></label>
+          <input type="text" id="f-subproject" list="subproject-datalist" placeholder="e.g. Tower A" maxlength="80" autocomplete="off"/>
+          <datalist id="subproject-datalist"></datalist>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Department <span class="opt">optional</span></label>
+        <div class="pill-group">
+          <label class="pill"><input type="radio" name="department" value="Marketing"/>Marketing</label>
+          <label class="pill"><input type="radio" name="department" value="Finance"/>Finance</label>
+          <label class="pill"><input type="radio" name="department" value="HR"/>HR</label>
+          <label class="pill"><input type="radio" name="department" value="Sales"/>Sales</label>
+          <label class="pill"><input type="radio" name="department" value="Operations"/>Operations</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Status <span class="req">*</span></label>
+        <div class="pill-group">
+          <label class="pill"><input type="radio" name="status" value="On Track" required/>🟢 On Track</label>
+          <label class="pill"><input type="radio" name="status" value="Delayed"/>🔴 Delayed</label>
+          <label class="pill"><input type="radio" name="status" value="Completed"/>🔵 Completed</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Update / Note <span class="req">*</span></label>
+        <div class="mic-wrap">
+          <textarea id="f-update" rows="3" placeholder="What's the latest?" required maxlength="400"></textarea>
+          <button type="button" class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Speak">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
+        </div>
+        <div class="form-meta"><span class="mic-status" id="mic-status"></span><span class="char-count" id="char-count">0 / 400</span></div>
+      </div>
+      <div class="form-group">
+        <label>Further Update Date <span class="opt">optional</span></label>
+        <input type="date" id="f-duedate"/>
+      </div>
+      <div class="form-group">
+        <label>Dependency <span class="opt">optional</span></label>
+        <div class="dep-row">
+          <input type="text" id="f-dep-input" list="dep-datalist" placeholder="Type and press Add…" maxlength="80" autocomplete="off"/>
+          <button type="button" class="btn-add-dep" onclick="addDependency()">Add</button>
+          <datalist id="dep-datalist">
+            <option value="Pending approval"/><option value="Waiting for materials"/>
+            <option value="Waiting for contractor"/><option value="RERA approval pending"/>
+            <option value="Municipal clearance"/><option value="Payment pending"/>
+          </datalist>
+        </div>
+        <div class="dep-tags" id="dep-tags"></div>
+      </div>
+      <div class="form-group">
+        <label>Attachments <span class="opt">optional</span></label>
+        <div class="upload-zone" onclick="document.getElementById('f-images').click()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Click to upload images</span>
+          <input type="file" id="f-images" accept="image/*" multiple style="display:none" onchange="handleImages(this)"/>
+        </div>
+        <div class="image-previews" id="image-previews"></div>
+      </div>
+      <div class="form-group">
+        <label>Your Name <span class="req">*</span></label>
+        <input type="text" id="f-name" placeholder="e.g. Rahul Sharma" required maxlength="60"/>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-primary" id="submit-btn">Post Update</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="overlay" id="history-overlay" onclick="closeHistoryOutside(event)">
+  <div class="modal modal-wide">
+    <div class="modal-head">
+      <h2>Completed History</h2>
+      <button class="modal-close" onclick="closeHistory()">✕</button>
+    </div>
+    <div id="history-body"><p class="no-data">No completed projects yet.</p></div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="overlay" id="lightbox" onclick="closeLightbox()" style="display:none;align-items:center;justify-content:center;">
+  <img id="lightbox-img" style="max-width:90vw;max-height:85vh;border-radius:8px;box-shadow:0 24px 60px rgba(0,0,0,0.5)"/>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="firebase.js?v=13"></script>
+<script src="app.js?v=13"></script>
+</body>
+</html>
